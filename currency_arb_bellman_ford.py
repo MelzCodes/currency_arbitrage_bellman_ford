@@ -6,7 +6,7 @@ def detect_arbitrage(exchange_rates):
     Detects if there is an arbitrage opportunity given exchange rates and identifies the cycle.
     Uses the Bellman-Ford algorithm on a log-transformed graph.
     
-    :param exchange_rates: A 2D list representing exchange rates between currencies.
+    :param exchange_rates: A 2D list representing exchange rates between currencies as a matrix.
     :return: A tuple (True, cycle) if an arbitrage opportunity exists, (False, None) otherwise.
     """
     num_currencies = len(exchange_rates)
