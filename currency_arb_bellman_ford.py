@@ -31,6 +31,7 @@ def Bellman_Ford_Arbitrage(rates_matrix, log_margin=0.001):
             if min_dist[dest] > min_dist[src] + rates_matrix.iloc[src][dest] + log_margin:
                 # negative cycle exists, and use the predecessor chain to print the cycle
                 cycle = [dest]
+                
                 # Start from the source and go backwards until you see the source vertex again
                 while True:
                     src = predecessor[src]
@@ -39,12 +40,41 @@ def Bellman_Ford_Arbitrage(rates_matrix, log_margin=0.001):
                     cycle.append(src)
                 cycle.append(dest)
                 
-                if len(cycle) > 3:
+                if len(cycle) > 2:
                     path = [currencies[p] for p in cycle[::-1]]
                     if path not in opportunities:
                         opportunities.append(path)
 
     return opportunities
+
+
+def test_arbitrage_profit(arbitrage_opportunities, exchange_rates):
+    max_profit = 0 
+    best_cycle = None
+
+    for path in arbitrage_opportunities:
+        cycle = path.copy()
+        initial_balance = 10_000
+        final_balance = initial_balance
+        source_currency = cycle.pop(0)
+
+        while cycle:
+            dest_currency = cycle.pop(0)
+            src_idx = currency_names.index(source_currency)
+            dest_idx = currency_names.index(dest_currency)
+            final_balance *= exchange_rates[src_idx][dest_idx]
+            source_currency = dest_currency  # move to next currency
+
+        profit = final_balance - initial_balance
+
+        if profit > max_profit: 
+            max_profit = profit
+            best_cycle = path
+
+    if best_cycle:
+        print(f'Most profitable arbitrage opportunity ({max_profit:.2f} GBP gain): {" -> ".join(best_cycle)}')
+    else:
+        print("No arbitrage opportunity found.")
 
 # Define exchange rate matrix from project 24 csc3025
 currency_names = ["GBP", "EUR", "USD", "CAD"]
@@ -60,7 +90,6 @@ arbitrage_opportunities = Bellman_Ford_Arbitrage(log_rates_matrix)
 
 # Display results
 if arbitrage_opportunities:
-    for cycle in arbitrage_opportunities:
-        print(f"Arbitrage opportunity exists! Cycle: {' -> '.join(cycle)}")
+    test_arbitrage_profit(arbitrage_opportunities, exchange_rates)
 else:
     print("No arbitrage opportunity.")
