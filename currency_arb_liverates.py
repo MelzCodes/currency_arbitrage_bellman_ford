@@ -74,7 +74,8 @@ api_key = 'you-cant-have-this-sorry'
 top10_currencies = ['GBP', 'EUR', 'JPY', 'USD', 'CNY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD']
 rates, time = get_currency_rates(api_key, top10_currencies)
 neg_log_rates, _ = get_currency_rates(api_key, top10_currencies, neg_log = True)
-print(f'Here are the current rates at time {time}')
+print(f'Here are the current rates at time: {time}\n')
+print(rates)
 
 arbitrage_opportunities = Bellman_Ford_Arbitrage(neg_log_rates)
 print('Available opportunities: ')
