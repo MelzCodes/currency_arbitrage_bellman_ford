@@ -10,6 +10,7 @@ This repository contains a Python script to identify arbitrage opportunities in 
 
 - Uses the Bellman-Ford algorithm to detect currency arbitrage opportunities.
 - Outputs potential profitable currency trading paths.
+- Live rates script pulls the top 10 currencies live prices and detects arbitrage opportunities in real time.
 
 ## Usage
 
@@ -26,4 +27,15 @@ This repository contains a Python script to identify arbitrage opportunities in 
   import pandas as pd
 ```
 
-That's it...
+3. **For the Live rates script:**
+   Install requests package
+
+```bash
+  import requests # (obs #1)
+```
+
+Create your API key:
+
+```bash
+   https://www.exchangerate-api.com/
+```
