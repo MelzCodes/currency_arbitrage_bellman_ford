@@ -6,7 +6,6 @@ from datetime import datetime
 
 def get_currency_rates(api_key, currencies, neg_log=False):
     data = pd.DataFrame(index = currencies, columns = currencies)
-    timestamp = pd.Timestamp.now() #capture the time we get the currency rates
     for currency in currencies:
         url = f"https://v6.exchangerate-api.com/v6/{api_key}/latest/{currency}"
         response = requests.get(url)
@@ -21,6 +20,7 @@ def get_currency_rates(api_key, currencies, neg_log=False):
             else:
                 data.loc[currency, currency_2] = rates['conversion_rates'][currency_2]
 
+    timestamp = rates['time_last_update_utc']
     if neg_log == False:
         data = data.astype(float)
         return data, timestamp
@@ -69,18 +69,22 @@ def Bellman_Ford_Arbitrage(rates_matrix, log_margin = 0.001):
                         opportunities.append(path)
     
     return opportunities
-                
+
+start = datetime.now()
+
 api_key = 'you-cant-have-this-sorry'
 top10_currencies = ['GBP', 'EUR', 'JPY', 'USD', 'CNY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD']
-rates, time = get_currency_rates(api_key, top10_currencies)
+rates, rates_timestamp = get_currency_rates(api_key, top10_currencies)
 neg_log_rates, _ = get_currency_rates(api_key, top10_currencies, neg_log = True)
-print(f'Here are the current rates at time: {time}\n')
+
+print(f'Here are the current rates at time: {rates_timestamp}\n')
 print(rates)
 
 arbitrage_opportunities = Bellman_Ford_Arbitrage(neg_log_rates)
-print('Available opportunities: ')
+print('\nAvailable opportunities: ')
 [print(a) for a in arbitrage_opportunities]
 
+print('\nEvaluate the gain of each opportunity:')
 # Testing
 for path in arbitrage_opportunities:
     arbitrage_1 = path.copy()    
@@ -96,11 +100,14 @@ for path in arbitrage_opportunities:
     
     if final_balance - initial_balance > 0.5:
         d = final_balance - initial_balance
-        print(f'ARBITRAGE OPPORTUNITY ({d}% gain): {path} ')
+        print(f'{path}: {d}% gain ')
     
     else:
-        print('NO ARBITRAGE OPPORTUNITY FOUND :(')
+        d = final_balance - initial_balance
+        print(f'{path}: Not profitiable, {d}% gain :(')
 
+end = datetime.now()
+print(f'\nTime taken to execute script: {end - start}')
 
 '''_______________________________OBSERVATIONS___________________________________
 obs #1: "Requests allows you to send HTTP/1.1 requests extremely easily. There's no need to 
