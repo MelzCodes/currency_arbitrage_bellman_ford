@@ -70,44 +70,50 @@ def Bellman_Ford_Arbitrage(rates_matrix, log_margin = 0.001):
     
     return opportunities
 
-start = datetime.now()
-
 api_key = 'you-cant-have-this-sorry'
-top10_currencies = ['GBP', 'EUR', 'JPY', 'USD', 'CNY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD']
+top10_currencies = ['GBP', 'EUR', 'JPY', 'USD', 'CNY', 'AUD', 'CAD', 'CHF', 'HKD', 'SGD']\
+
+start = datetime.now()
 rates, rates_timestamp = get_currency_rates(api_key, top10_currencies)
+end = datetime.now()
 neg_log_rates, _ = get_currency_rates(api_key, top10_currencies, neg_log = True)
 
 print(f'Here are the current rates at time: {rates_timestamp}\n')
 print(rates)
 
+print(f'\nTime taken to retrieve FX-rates from API: {end - start}')
+start = datetime.now()
 arbitrage_opportunities = Bellman_Ford_Arbitrage(neg_log_rates)
-print('\nAvailable opportunities: ')
-[print(a) for a in arbitrage_opportunities]
-
-print('\nEvaluate the gain of each opportunity:')
-# Testing
-for path in arbitrage_opportunities:
-    arbitrage_1 = path.copy()    
-    
-    initial_balance = 10_000 # in the respective source-currency listed first on 'arbitrage_1'
-    final_balance = initial_balance
-    
-    source_currency = arbitrage_1.pop()
-    while arbitrage_1:
-        dest_currency = arbitrage_1.pop()
-        final_balance *= rates[source_currency][dest_currency]        
-        source_currency = dest_currency
-    
-    if final_balance - initial_balance > 0.5:
-        d = final_balance - initial_balance
-        print(f'{path}: {d}% gain ')
-    
-    else:
-        d = final_balance - initial_balance
-        print(f'{path}: Not profitiable, {d}% gain :(')
-
 end = datetime.now()
-print(f'\nTime taken to execute script: {end - start}')
+
+if len(arbitrage_opportunities) > 0:
+    print('\nEvaluate the gain of each opportunity:')
+
+    # Testing
+    for path in arbitrage_opportunities:
+        arbitrage_1 = path.copy()    
+        
+        initial_balance = 10_000 # in the respective source-currency listed first on 'arbitrage_1'
+        final_balance = initial_balance
+        
+        source_currency = arbitrage_1.pop()
+        while arbitrage_1:
+            dest_currency = arbitrage_1.pop()
+            final_balance *= rates[source_currency][dest_currency]        
+            source_currency = dest_currency
+        
+        if final_balance - initial_balance > 0.5:
+            d = final_balance - initial_balance
+            print(f'{path}: £{round(d, 2)} gain from £{initial_balance} investment')
+        
+        else:
+            d = final_balance - initial_balance
+            print(f'{path}: Not profitiable, £{round(d, 2)} gain from £{initial_balance} investment')
+
+else:
+    print('No arbitrage opportunity exists :(')
+
+print(f'\nTime taken to run algorithm: {end - start}')
 
 '''_______________________________OBSERVATIONS___________________________________
 obs #1: "Requests allows you to send HTTP/1.1 requests extremely easily. There's no need to 
